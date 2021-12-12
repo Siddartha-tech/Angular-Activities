@@ -1,8 +1,11 @@
-using System.Reflection;
+// using System.Reflection;
 using Application;
+using Application.Activities.Commands.CreateActivity;
+using FluentValidation.AspNetCore;
 using Infrastructure;
-using Infrastructure.Persistence;
-using Microsoft.OpenApi.Models;
+// using Infrastructure.Persistence;
+// using Microsoft.OpenApi.Models;
+using WebUI.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Services.pro
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+            options.Filters.Add<ApiExceptionFilterAttribute>())
+                .AddFluentValidation(x => x.AutomaticValidationEnabled = false); //&& 
+                // x.RegisterValidatorsFromAssemblyContaining<CreateActivityCommandValidator>());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

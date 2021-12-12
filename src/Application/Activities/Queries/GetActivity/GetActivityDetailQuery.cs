@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Domain.Entities;
 using MediatR;
@@ -19,7 +20,12 @@ namespace Application.Activities.Queries.GetActivity
 
         public async Task<Activity> Handle(GetActivityDetailQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Activities.FindAsync(request.Id) ?? new Activity();
+            var entity = await _context.Activities.FindAsync(request.Id);
+            if (entity == null)
+            {
+                throw new NotFoundException(nameof(Activities), request.Id);
+            }
+            return entity;//await _context.Activities.FindAsync(request.Id) ?? throw new NotFoundException(nameof(Activities), request.Id);
         }
     }
 }
