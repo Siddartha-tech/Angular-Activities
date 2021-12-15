@@ -22,23 +22,23 @@ namespace Application.Activities.Queries.GetActivities
         }
         public async Task<List<Activity>> Handle(GetActivitiesQuery request, CancellationToken cancellationToken)
         {
-            try
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(1000, cancellationToken);
-                    _logger.LogInformation("Task {0} has completed", i);
-                }
-            }
-            catch (System.OperationCanceledException ex)
-            {
-                _logger.LogInformation("Task was canceled. {0}", ex.Message);
-            }
-            catch (System.ObjectDisposedException ex)
-            {
-                _logger.LogInformation("Task was canceled. {0}", ex.Message);
-            }
+            // try
+            // {
+            //     for (int i = 0; i < 10; i++)
+            //     {
+            //         cancellationToken.ThrowIfCancellationRequested();
+            //         await Task.Delay(1000, cancellationToken);
+            //         _logger.LogInformation("Task {0} has completed", i);
+            //     }
+            // }
+            // catch (System.OperationCanceledException ex)
+            // {
+            //     _logger.LogInformation("Task was canceled. {0}", ex.Message);
+            // }
+            // catch (System.ObjectDisposedException ex)
+            // {
+            //     _logger.LogInformation("Task was canceled. {0}", ex.Message);
+            // }
             if (_context.Activities != null && _context.Activities.Any())
             {
                 return await _context.Activities.ToListAsync(cancellationToken);

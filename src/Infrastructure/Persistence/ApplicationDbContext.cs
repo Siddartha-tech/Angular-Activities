@@ -1,13 +1,30 @@
 ﻿using System.Reflection;
 using Application.Common.Interfaces;
+using Domain.Common;
 using Domain.Entities;
+using Duende.IdentityServer.EntityFramework.Options;
+using Infrastructure.Identity;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Persistence;
-public class ApplicationDbContext : DbContext, IApplicationDbContext
+public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTime _dateTime;
+    private readonly IDomainEventService _domainEventService;
+
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options,
+        IOptions<OperationalStoreOptions> operationalStoreOptions,
+        ICurrentUserService currentUserService,
+        IDomainEventService domainEventService,
+        IDateTime dateTime) : base(options, operationalStoreOptions)
     {
+        _currentUserService = currentUserService;
+        _domainEventService = domainEventService;
+        _dateTime = dateTime;
     }
 
     // dotnet ef migrations add InitialCreate -p .\src\Infrastructure\ -s .\src\WebUI\ -o .\Persistence\Migrations
@@ -17,7 +34,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        /*
         foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
         {
             switch (entry.State)
@@ -39,10 +55,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .SelectMany(x => x)
                 .Where(domainEvent => !domainEvent.IsPublished)
                 .ToArray();
-*/
+                
         var result = await base.SaveChangesAsync(cancellationToken);
 
-        // await DispatchEvents(events);
+        await DispatchEvents(events);
 
         return result;
     }
@@ -54,12 +70,12 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         base.OnModelCreating(builder);
     }
 
-    /*private async Task DispatchEvents(DomainEvent[] events)
+    private async Task DispatchEvents(DomainEvent[] events)
     {
         foreach (var @event in events)
         {
             @event.IsPublished = true;
             await _domainEventService.Publish(@event);
         }
-    }*/
+    }
 }
